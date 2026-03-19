@@ -1,0 +1,51 @@
+{
+  "name": "chat-state-durable-object",
+  "version": "0.1.4",
+  "description": "Cloudflare Durable Objects state adapter for Chat SDK",
+  "type": "module",
+  "packageManager": "pnpm@10.30.2",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "chat": "^4.20.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20260317.1",
+    "@types/node": "^24.3.0",
+    "chat": "4.20.2",
+    "tsup": "^8.5.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.0",
+    "wrangler": "^4.76.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "chat-sdk",
+    "chat",
+    "state-adapter",
+    "cloudflare",
+    "durable-objects",
+    "workers"
+  ],
+  "license": "MIT"
+}
