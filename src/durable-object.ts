@@ -23,7 +23,12 @@ export class DurableObjectState<TEnv = unknown>
   }
 
   async acquireLock(threadId: string, ttlMs: number) {
-    return this.kernel.acquireLock(threadId, ttlMs)
+    const result = this.ctx.storage.transactionSync(() => this.kernel.acquireLock(threadId, ttlMs))
+    if (result) {
+      this.scheduleCleanupIfNeeded()
+    }
+
+    return result
   }
 
   async cacheDelete(key: string): Promise<void> {
@@ -36,6 +41,9 @@ export class DurableObjectState<TEnv = unknown>
 
   async cacheSet(key: string, valueJson: string, ttlMs?: number): Promise<void> {
     this.kernel.set(key, valueJson, ttlMs)
+    if (ttlMs != null && ttlMs > 0) {
+      this.scheduleCleanupIfNeeded()
+    }
   }
 
   async cacheSetIfNotExists(
@@ -43,7 +51,14 @@ export class DurableObjectState<TEnv = unknown>
     valueJson: string,
     ttlMs?: number,
   ): Promise<boolean> {
-    return this.kernel.setIfNotExists(key, valueJson, ttlMs)
+    const result = this.ctx.storage.transactionSync(() =>
+      this.kernel.setIfNotExists(key, valueJson, ttlMs),
+    )
+    if (result && ttlMs != null && ttlMs > 0) {
+      this.scheduleCleanupIfNeeded()
+    }
+
+    return result
   }
 
   async listAppend(
@@ -55,10 +70,20 @@ export class DurableObjectState<TEnv = unknown>
     },
   ): Promise<void> {
     this.kernel.appendToList(key, valueJson, options)
+    if (options?.ttlMs != null && options.ttlMs > 0) {
+      this.scheduleCleanupIfNeeded()
+    }
   }
 
   async extendLock(threadId: string, token: string, ttlMs: number): Promise<boolean> {
-    return this.kernel.extendLock(threadId, token, ttlMs)
+    const result = this.ctx.storage.transactionSync(() =>
+      this.kernel.extendLock(threadId, token, ttlMs),
+    )
+    if (result) {
+      this.scheduleCleanupIfNeeded()
+    }
+
+    return result
   }
 
   async forceReleaseLock(threadId: string): Promise<void> {
@@ -83,5 +108,28 @@ export class DurableObjectState<TEnv = unknown>
 
   async unsubscribe(threadId: string): Promise<void> {
     this.kernel.unsubscribe(threadId)
+  }
+
+  async alarm(): Promise<void> {
+    try {
+      this.store.deleteExpired(Date.now())
+
+      const next = this.store.nextExpiry(Date.now())
+      if (next != null) {
+        await this.ctx.storage.setAlarm(next)
+      }
+    } catch (error) {
+      console.error('DurableObjectState: alarm handler failed, rescheduling:', error)
+      await this.ctx.storage.setAlarm(Date.now() + 30_000)
+    }
+  }
+
+  private scheduleCleanupIfNeeded(): void {
+    const next = this.store.nextExpiry(Date.now())
+    if (next != null) {
+      this.ctx.storage.setAlarm(next).catch((error: unknown) => {
+        console.error('DurableObjectState: failed to schedule cleanup alarm:', error)
+      })
+    }
   }
 }

@@ -11,6 +11,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "types": [
+      "@cloudflare/vitest-pool-workers/types",
       "@cloudflare/workers-types",
       "node",
       "vitest/globals"

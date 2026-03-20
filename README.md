@@ -91,18 +91,18 @@ Options:
 
 - Durable Objects are the only backend in v1.
 - Thread operations shard by `threadId`.
-- Generic key and list operations shard by the hashed key.
-- Expiry is lazy on read/write, not alarm-driven.
+- Generic key and list operations use the default shard.
+- Expiring locks, values, and list items schedule Durable Object alarms for cleanup.
 - List appends preserve insertion order and support trimming.
+- Tests include both fast contract tests and a real Workers runtime RPC integration test.
 
 ## Comparison with `chat-state-cloudflare-do`
 
 Stronger here:
 
 - full `StateAdapter` coverage
-- separate thread-shard and value-shard routing
 - explicit list support for persisted Chat SDK message history
-- contract, kernel, and Chat integration tests
+- contract, kernel, Chat integration, and real Workers RPC integration tests
 
 Equivalent:
 
@@ -112,7 +112,7 @@ Equivalent:
 
 Weaker for now:
 
-- no alarm-based cleanup
+- more internal abstraction than the original package
 - no published production benchmark claims yet
 
 ## Development

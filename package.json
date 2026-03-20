@@ -1,6 +1,6 @@
 {
   "name": "chat-state-durable-object",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Cloudflare Durable Objects state adapter for Chat SDK",
   "type": "module",
   "packageManager": "pnpm@10.30.2",
@@ -28,6 +28,7 @@
     "chat": "^4.20.0"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.13.3",
     "@cloudflare/workers-types": "4.20260317.1",
     "@types/node": "^24.3.0",
     "chat": "4.20.2",

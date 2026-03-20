@@ -1,14 +1,16 @@
+import { cloudflareTest } from '@cloudflare/vitest-pool-workers'
 import { defineConfig } from 'vitest/config'
-import { fileURLToPath } from 'node:url'
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      'cloudflare:workers': fileURLToPath(new URL('./tests/mocks/cloudflare-workers.ts', import.meta.url)),
-    },
-  },
+  plugins: [
+    cloudflareTest({
+      main: './tests/worker.ts',
+      wrangler: {
+        configPath: './wrangler.test.jsonc',
+      },
+    }),
+  ],
   test: {
-    environment: 'node',
     globals: true,
     include: ['tests/**/*.test.ts'],
   },

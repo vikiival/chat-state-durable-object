@@ -3,6 +3,18 @@ import type { StateStore, StoredListItem, StoredLock, StoredValue } from '../typ
 export class SqlStateStore implements StateStore {
   constructor(private readonly sql: SqlStorage) {}
 
+  deleteExpired(now: number): void {
+    this.sql.exec('DELETE FROM locks WHERE expires_at <= ?', now)
+    this.sql.exec(
+      'DELETE FROM values_store WHERE expires_at IS NOT NULL AND expires_at <= ?',
+      now,
+    )
+    this.sql.exec(
+      'DELETE FROM list_items WHERE expires_at IS NOT NULL AND expires_at <= ?',
+      now,
+    )
+  }
+
   migrate(): void {
     this.sql.exec(`
       CREATE TABLE IF NOT EXISTS subscriptions (
@@ -29,6 +41,27 @@ export class SqlStateStore implements StateStore {
         PRIMARY KEY (list_key, item_order)
       );
     `)
+  }
+
+  nextExpiry(now: number): number | null {
+    const rows = (this.sql
+      .exec(
+        `SELECT MIN(expires_at) AS nextExpiry FROM (
+          SELECT expires_at FROM locks WHERE expires_at > ?
+          UNION ALL
+          SELECT expires_at FROM values_store WHERE expires_at IS NOT NULL AND expires_at > ?
+          UNION ALL
+          SELECT expires_at FROM list_items WHERE expires_at IS NOT NULL AND expires_at > ?
+        )`,
+        now,
+        now,
+        now,
+      )
+      .toArray() as Array<{
+      nextExpiry: number | null
+    }>)
+
+    return rows[0]?.nextExpiry ?? null
   }
 
   deleteLock(threadId: string): void {
