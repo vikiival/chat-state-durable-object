@@ -1,11 +1,11 @@
 import type { Lock, StateAdapter } from 'chat'
 
 export interface CloudflareStateRpc {
-  acquireLock(threadId: string, ttlMs: number): Lock | null
-  cacheDelete(key: string): void
-  cacheGet(key: string): string | null
-  cacheSet(key: string, valueJson: string, ttlMs?: number): void
-  cacheSetIfNotExists(key: string, valueJson: string, ttlMs?: number): boolean
+  acquireLock(threadId: string, ttlMs: number): Promise<Lock | null>
+  cacheDelete(key: string): Promise<void>
+  cacheGet(key: string): Promise<string | null>
+  cacheSet(key: string, valueJson: string, ttlMs?: number): Promise<void>
+  cacheSetIfNotExists(key: string, valueJson: string, ttlMs?: number): Promise<boolean>
   listAppend(
     key: string,
     valueJson: string,
@@ -13,14 +13,14 @@ export interface CloudflareStateRpc {
       maxLength?: number
       ttlMs?: number
     },
-  ): void
-  extendLock(threadId: string, token: string, ttlMs: number): boolean
-  forceReleaseLock(threadId: string): void
-  listGet(key: string): string[]
-  isSubscribed(threadId: string): boolean
-  releaseLock(threadId: string, token: string): void
-  subscribe(threadId: string): void
-  unsubscribe(threadId: string): void
+  ): Promise<void>
+  extendLock(threadId: string, token: string, ttlMs: number): Promise<boolean>
+  forceReleaseLock(threadId: string): Promise<void>
+  listGet(key: string): Promise<string[]>
+  isSubscribed(threadId: string): Promise<boolean>
+  releaseLock(threadId: string, token: string): Promise<void>
+  subscribe(threadId: string): Promise<void>
+  unsubscribe(threadId: string): Promise<void>
 }
 
 export interface CloudflareStateOptions {

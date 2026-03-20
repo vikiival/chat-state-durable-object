@@ -22,62 +22,66 @@ export class DurableObjectState<TEnv = unknown>
     })
   }
 
-  acquireLock(threadId: string, ttlMs: number) {
+  async acquireLock(threadId: string, ttlMs: number) {
     return this.kernel.acquireLock(threadId, ttlMs)
   }
 
-  cacheDelete(key: string): void {
+  async cacheDelete(key: string): Promise<void> {
     this.kernel.delete(key)
   }
 
-  cacheGet(key: string): string | null {
+  async cacheGet(key: string): Promise<string | null> {
     return this.kernel.getValueJson(key)
   }
 
-  cacheSet(key: string, valueJson: string, ttlMs?: number): void {
+  async cacheSet(key: string, valueJson: string, ttlMs?: number): Promise<void> {
     this.kernel.set(key, valueJson, ttlMs)
   }
 
-  cacheSetIfNotExists(key: string, valueJson: string, ttlMs?: number): boolean {
+  async cacheSetIfNotExists(
+    key: string,
+    valueJson: string,
+    ttlMs?: number,
+  ): Promise<boolean> {
     return this.kernel.setIfNotExists(key, valueJson, ttlMs)
   }
 
-  listAppend(
+  async listAppend(
     key: string,
     valueJson: string,
     options?: {
       maxLength?: number
       ttlMs?: number
     },
-  ): void {
+  ): Promise<void> {
     this.kernel.appendToList(key, valueJson, options)
   }
 
-  extendLock(threadId: string, token: string, ttlMs: number): boolean {
+  async extendLock(threadId: string, token: string, ttlMs: number): Promise<boolean> {
     return this.kernel.extendLock(threadId, token, ttlMs)
   }
 
-  forceReleaseLock(threadId: string): void {
+  async forceReleaseLock(threadId: string): Promise<void> {
     this.kernel.forceReleaseLock(threadId)
   }
 
-  listGet(key: string): string[] {
+  async listGet(key: string): Promise<string[]> {
     return this.kernel.getListValueJsons(key)
   }
 
-  isSubscribed(threadId: string): boolean {
+  async isSubscribed(threadId: string): Promise<boolean> {
     return this.kernel.isSubscribed(threadId)
   }
 
-  releaseLock(threadId: string, token: string): void {
+  async releaseLock(threadId: string, token: string): Promise<void> {
     this.kernel.releaseLock(threadId, token)
   }
 
-  subscribe(threadId: string): void {
+  async subscribe(threadId: string): Promise<void> {
     this.kernel.subscribe(threadId)
   }
 
-  unsubscribe(threadId: string): void {
+  async unsubscribe(threadId: string): Promise<void> {
     this.kernel.unsubscribe(threadId)
   }
 }

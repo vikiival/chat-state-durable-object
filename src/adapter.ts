@@ -42,7 +42,7 @@ export class CloudflareStateAdapter implements StateAdapter {
     },
   ): Promise<void> {
     this.assertConnected()
-    await this.valueStub(key).listAppend(key, serializeValue(value), {
+    await this.valueStub().listAppend(key, serializeValue(value), {
       maxLength: options?.maxLength,
       ttlMs: options?.ttlMs ?? this.options.defaultTtlMs ?? undefined,
     })
@@ -54,7 +54,7 @@ export class CloudflareStateAdapter implements StateAdapter {
 
   async delete(key: string): Promise<void> {
     this.assertConnected()
-    await this.valueStub(key).cacheDelete(key)
+    await this.valueStub().cacheDelete(key)
   }
 
   async disconnect(): Promise<void> {
@@ -71,13 +71,13 @@ export class CloudflareStateAdapter implements StateAdapter {
 
   async get<T = unknown>(key: string): Promise<T | null> {
     this.assertConnected()
-    const valueJson = await this.valueStub(key).cacheGet(key)
+    const valueJson = await this.valueStub().cacheGet(key)
     return valueJson == null ? null : deserializeValue<T>(valueJson)
   }
 
   async getList<T = unknown>(key: string): Promise<T[]> {
     this.assertConnected()
-    return (await this.valueStub(key).listGet(key)).map((valueJson) => deserializeValue<T>(valueJson))
+    return (await this.valueStub().listGet(key)).map((valueJson) => deserializeValue<T>(valueJson))
   }
 
   async isSubscribed(threadId: string): Promise<boolean> {
@@ -90,7 +90,7 @@ export class CloudflareStateAdapter implements StateAdapter {
 
   async set<T = unknown>(key: string, value: T, ttlMs?: number): Promise<void> {
     this.assertConnected()
-    await this.valueStub(key).cacheSet(
+    await this.valueStub().cacheSet(
       key,
       serializeValue(value),
       ttlMs ?? this.options.defaultTtlMs ?? undefined,
@@ -99,7 +99,7 @@ export class CloudflareStateAdapter implements StateAdapter {
 
   async setIfNotExists(key: string, value: unknown, ttlMs?: number): Promise<boolean> {
     this.assertConnected()
-    return await this.valueStub(key).cacheSetIfNotExists(
+    return await this.valueStub().cacheSetIfNotExists(
       key,
       serializeValue(value),
       ttlMs ?? this.options.defaultTtlMs ?? undefined,
@@ -139,9 +139,7 @@ export class CloudflareStateAdapter implements StateAdapter {
     )
   }
 
-  private valueStub(key: string): CloudflareStateRpc {
-    return this.stubByName(
-      shardNameForValue(this.options.keyPrefix, key, this.options.shardCount),
-    )
+  private valueStub(): CloudflareStateRpc {
+    return this.stubByName(shardNameForValue(this.options.keyPrefix))
   }
 }

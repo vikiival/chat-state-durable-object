@@ -73,7 +73,7 @@ describe('CloudflareStateAdapter contract', () => {
     await expect(state.getList('list:1')).resolves.toEqual(['b', 'c'])
   })
 
-  it('routes thread and value keys through independent shard names', async () => {
+  it('routes thread and cache keys through thread and default shard names', async () => {
     const mock = createMockNamespace()
     const state = createCloudflareState({
       namespace: mock.namespace,
@@ -85,6 +85,6 @@ describe('CloudflareStateAdapter contract', () => {
     await state.set('cache:1', 'value')
 
     expect(mock.nameLog[0]).toContain('thread:')
-    expect(mock.nameLog[1]).toContain('value:')
+    expect(mock.nameLog[1]).toContain('default')
   })
 })

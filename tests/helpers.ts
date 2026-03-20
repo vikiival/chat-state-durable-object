@@ -11,46 +11,50 @@ export class MockCloudflareStateDO implements CloudflareStateRpc {
     this.kernel = new CloudflareStateKernel(store)
   }
 
-  acquireLock(threadId: string, ttlMs: number): Lock | null {
+  async acquireLock(threadId: string, ttlMs: number): Promise<Lock | null> {
     return this.kernel.acquireLock(threadId, ttlMs)
   }
 
-  cacheDelete(key: string): void {
+  async cacheDelete(key: string): Promise<void> {
     this.kernel.delete(key)
   }
 
-  cacheGet(key: string): string | null {
+  async cacheGet(key: string): Promise<string | null> {
     return this.kernel.getValueJson(key)
   }
 
-  cacheSet(key: string, valueJson: string, ttlMs?: number): void {
+  async cacheSet(key: string, valueJson: string, ttlMs?: number): Promise<void> {
     this.kernel.set(key, valueJson, ttlMs)
   }
 
-  cacheSetIfNotExists(key: string, valueJson: string, ttlMs?: number): boolean {
+  async cacheSetIfNotExists(
+    key: string,
+    valueJson: string,
+    ttlMs?: number,
+  ): Promise<boolean> {
     return this.kernel.setIfNotExists(key, valueJson, ttlMs)
   }
 
-  listAppend(
+  async listAppend(
     key: string,
     valueJson: string,
     options?: {
       maxLength?: number
       ttlMs?: number
     },
-  ): void {
+  ): Promise<void> {
     this.kernel.appendToList(key, valueJson, options)
   }
 
-  extendLock(threadId: string, token: string, ttlMs: number): boolean {
+  async extendLock(threadId: string, token: string, ttlMs: number): Promise<boolean> {
     return this.kernel.extendLock(threadId, token, ttlMs)
   }
 
-  forceReleaseLock(threadId: string): void {
+  async forceReleaseLock(threadId: string): Promise<void> {
     this.kernel.forceReleaseLock(threadId)
   }
 
-  listGet(key: string): string[] {
+  async listGet(key: string): Promise<string[]> {
     return this.kernel.getListValueJsons(key)
   }
 
@@ -58,19 +62,19 @@ export class MockCloudflareStateDO implements CloudflareStateRpc {
     return this.store
   }
 
-  isSubscribed(threadId: string): boolean {
+  async isSubscribed(threadId: string): Promise<boolean> {
     return this.kernel.isSubscribed(threadId)
   }
 
-  releaseLock(threadId: string, token: string): void {
+  async releaseLock(threadId: string, token: string): Promise<void> {
     this.kernel.releaseLock(threadId, token)
   }
 
-  subscribe(threadId: string): void {
+  async subscribe(threadId: string): Promise<void> {
     this.kernel.subscribe(threadId)
   }
 
-  unsubscribe(threadId: string): void {
+  async unsubscribe(threadId: string): Promise<void> {
     this.kernel.unsubscribe(threadId)
   }
 }
@@ -86,7 +90,38 @@ export function createMockNamespace() {
         instances.set(name, new MockCloudflareStateDO())
       }
 
-      return instances.get(name) as unknown as DurableObjectStub
+      const instance = instances.get(name) as MockCloudflareStateDO
+
+      return {
+        acquireLock: (...args: Parameters<MockCloudflareStateDO['acquireLock']>) =>
+          instance.acquireLock(...args),
+        cacheDelete: (...args: Parameters<MockCloudflareStateDO['cacheDelete']>) =>
+          instance.cacheDelete(...args),
+        cacheGet: (...args: Parameters<MockCloudflareStateDO['cacheGet']>) =>
+          instance.cacheGet(...args),
+        cacheSet: (...args: Parameters<MockCloudflareStateDO['cacheSet']>) =>
+          instance.cacheSet(...args),
+        cacheSetIfNotExists: (
+          ...args: Parameters<MockCloudflareStateDO['cacheSetIfNotExists']>
+        ) => instance.cacheSetIfNotExists(...args),
+        extendLock: (...args: Parameters<MockCloudflareStateDO['extendLock']>) =>
+          instance.extendLock(...args),
+        forceReleaseLock: (
+          ...args: Parameters<MockCloudflareStateDO['forceReleaseLock']>
+        ) => instance.forceReleaseLock(...args),
+        isSubscribed: (...args: Parameters<MockCloudflareStateDO['isSubscribed']>) =>
+          instance.isSubscribed(...args),
+        listAppend: (...args: Parameters<MockCloudflareStateDO['listAppend']>) =>
+          instance.listAppend(...args),
+        listGet: (...args: Parameters<MockCloudflareStateDO['listGet']>) =>
+          instance.listGet(...args),
+        releaseLock: (...args: Parameters<MockCloudflareStateDO['releaseLock']>) =>
+          instance.releaseLock(...args),
+        subscribe: (...args: Parameters<MockCloudflareStateDO['subscribe']>) =>
+          instance.subscribe(...args),
+        unsubscribe: (...args: Parameters<MockCloudflareStateDO['unsubscribe']>) =>
+          instance.unsubscribe(...args),
+      } as unknown as DurableObjectStub
     },
     idFromName(name: string) {
       nameLog.push(name)
