@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "chat-state-cloudflare-example-telegram-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-03-19",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "CHAT_STATE",
+        "class_name": "DurableObjectState"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "DurableObjectState"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "chat-state-cloudflare-example-telegram-worker",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@chat-adapter/telegram": "4.20.2",
+    "chat-state-durable-object": "file:../..",
+    "chat": "4.20.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20260317.1",
+    "typescript": "5.9.3",
+    "wrangler": "^4.75.0"
+  }
+}
